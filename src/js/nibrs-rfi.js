@@ -8,7 +8,7 @@ var statusChart = dc.rowChart("#status-chart");
 var neighborhoodChart = dc.rowChart("#neighborhood-chart");
 var reasonChart = dc.rowChart("#reason-chart");
 var openDaysChart = dc.rowChart("#opendays-chart");
-var dataTable = dc.dataTable("#data-table")
+var dataTable = dc.dataTable("#data-table");
 var dataCount = dc.dataCount('.data-count');
 
 var allCharts = [
@@ -24,41 +24,8 @@ var allCharts = [
 
 var singleColor = ["#1a8bba"];
 
-
-var smallIcon = L.divIcon({className: "small-div-marker"});
-var mapClustersLayer = L.markerClusterGroup({maxClusterRadius: 50});
-var map = L.map('map', {
-  center: [42.313, -71.099],
-  zoom: 11,
-  maxZoom: 18,
-  layers: [mapClustersLayer]
-});
-
-L.tileLayer('http://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png',{
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="http://cartodb.com/attributions">CartoDB</a>',
-    maxZoom:18
-}).addTo(map);
-
-var locations = null;
 var onFiltered = function(chart, filter) {
-  updateMap(locations.top(Infinity));
-};
-
-var updateMap = function(locs) {
-  mapClustersLayer.clearLayers();
-  var markers = locs.map(function(item){
-    if( item.g.latitude!=null && item.g.latitude!=undefined) {
-      return L.marker([item.g.latitude, item.g.longitude],
-        {icon: smallIcon}).bindPopup(
-          item.t + 
-          "<br/>" + item.l +
-          "<br/><strong>Enquiry ID:</strong>" + item.id + 
-          "<br/><strong>Opened: </strong>" + item.d + 
-          "<br/><strong>Status: </strong>" + item.a
-        );
-    }
-  });
-  mapClustersLayer.addLayers(markers);          
+  //updateMap(locations.top(Infinity));
 };
 
 var today = new Date();
@@ -111,7 +78,6 @@ d3.csv(boston_data_url, function(err, data) {
   var status = index.dimension( function(d) { return d.a; } );
   var neighborhoods = index.dimension( function(d) { return d.n; } );
   var reasons = index.dimension( function(d) { return d.r; } ); 
-  locations = index.dimension( function(d) { return d.g; });
   var days_open = index.dimension( function(d) { return d.time_to_close; });
 
   dataCount
@@ -235,7 +201,6 @@ d3.csv(boston_data_url, function(err, data) {
     .order(d3.descending); 
 
   dc.renderAll();
-  updateMap(locations.top(Infinity));
 
 });
 

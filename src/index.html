@@ -4,20 +4,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- bower:css -->
+  <link rel="stylesheet" href="../bower_components/bootstrap/dist/css/bootstrap.css" />
+  <link rel="stylesheet" href="../bower_components/dcjs/dc.css" />
   <!-- endbower -->
-  <link rel="stylesheet" href="css/mayors_hotline.css">
+  <link rel="stylesheet" href="css/nibrs-rfi.css">
   <link rel="shortcut icon" href="img/favicon.ico">
-  <title>Mayor's Hotline Explorer</title>
+  <title>NIBRS Explorer</title>
 </head>
 <body>
   <header>
     <div class="jumbotron" id="jumbotron">
       <div class="container">
-        <h1>Mayor's Hotline Explorer <small>(last 30 days)</small></h1>
-        <p>This interactive tool allows you to explore the submissions from the last 30 days to the City of Boston's <a href="http://www.cityofboston.gov/mayor/24/">Mayor's 24-Hour Constituent Services Hotline</a>. The displays are all inter-connected&mdash;tap on a row in one of the bar charts to filter on that value. Click-and-drag to select a range on the time graph to analyze a particular time range.<br/><em>Please note that it takes a moment to load the initial data.</em></p>
-      </div>
-      <div class="caption">
-        <small class="text-muted">Photo credit: <a href="https://www.flickr.com/photos/werkunz/4608613719">"Boston Downtown at Night"</a> by <a href="https://www.flickr.com/photos/werkunz/">Werner Kunz</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/2.0/">CC BY-NC-SA 2.0</a>.</small>
+        <h1>NIBRS Explorer <small>(last ??? days)</small></h1>
+        <p><a href="img/FBI_banner.jpg"></a>The displays are all inter-connected&mdash;tap on a row in one of the bar charts to filter on that value. Click-and-drag to select a range on the time graph to analyze a particular time range.<br/><em>Please note that it takes a moment to load the initial data.</em></p>
       </div>
     </div>
   </header>
@@ -126,13 +125,18 @@
 
   <footer>
     <div class="container-fluid">
-      <p class="pull-right">An <a href="http://labs.atsid.com" title="Applied Technical Systems, Inc. (ATS) website" target="_blank"><img src="img/ats.png" width="30" alt="Applied Technical Systems, Inc. (ATS)" style="vertical-align: baseline;"/></a> Labs project, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0.html" title="Apache License, Version 2.0" target="_blank">APLv2</a>. See <a href="https://github.com/atsid/mayors-hotline-explorer" target="_blank">the source code on GitHub</a> for details.</p>
+      <p class="pull-right">An <a href="http://labs.atsid.com" title="Applied Technical Systems, Inc. (ATS) website" target="_blank"><img src="img/ats.png" width="30" alt="Applied Technical Systems, Inc. (ATS)" style="vertical-align: baseline;"/></a> Labs project, licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0.html" title="Apache License, Version 2.0" target="_blank">APLv2</a>. See <a href="https://github.com/atsid/nibrs-rfi" target="_blank">the source code on GitHub</a> for details.</p>
     </div>
   </footer>
 
   <!-- bower:js -->
+  <script src="../bower_components/jquery/dist/jquery.js"></script>
+  <script src="../bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="../bower_components/d3/d3.js"></script>
+  <script src="../bower_components/crossfilter/crossfilter.js"></script>
+  <script src="../bower_components/dcjs/dc.js"></script>
   <!-- endbower -->
-  <script src="js/mayors_hotline.js"></script>
+  <script src="js/nibrs-rfi.js"></script>
 
 </body>
 </html>

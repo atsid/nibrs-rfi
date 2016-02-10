@@ -1,5 +1,5 @@
 {
-  "name": "mayors-hotline-explorer",
+  "name": "nibrs-rfi",
   "version": "0.0.1",
   "description": "",
   "main": "gulpfile.js",
@@ -8,21 +8,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/atsid/mayors-hotline-explorer.git"
+    "url": "git@github.com:atsid/nibrs-rfi.git"
   },
-  "author": "Ken Smith <ken.smith@2scientists.net>",
+  "author": "Greg Kedge <greg.kedge@atsid.com>",
   "license": "Apache2.0",
   "bugs": {
-    "url": "https://github.com/atsid/mayors-hotline-explorer/issues"
+    "url": "https://github.com/atsid/nibrs-rfi/issues"
   },
-  "homepage": "https://github.com/atsid/mayors-hotline-explorer",
+  "homepage": "https://github.com/atsid/nibrs-rfi",
   "devDependencies": {
+    "browser-sync": "^2.2.1",
     "gulp": "~3.8.11",
     "gulp-gh-pages": "~0.5.0",
     "wiredep": "~2.2.2",
     "gulp-bower": "0.0.10",
     "gulp-watch": "~4.2.0",
-    "run-sequence": "~1.0.2",
     "gulp-copy": "0.0.2",
     "del": "~1.1.1",
     "gulp-ga": "0.0.3",

@@ -9,13 +9,15 @@ var ghPages = require('gulp-gh-pages');
 var wiredep = require('wiredep').stream;
 var bower = require('gulp-bower');
 var watch = require('gulp-watch');
-var runSequence = require('run-sequence');
+var browserSync = require('browser-sync');
 var del = require('del');
+
+var reload = browserSync.reload;
 
 var config = {
   paths: {
-    app:   'src',
-    build: 'dist'
+    app:   'src'
+    //build: 'dist'
   }
 };
 
@@ -45,13 +47,15 @@ gulp.task('js', ['js:clean'], function() {
   return gulp.src(config.paths.app + '/js/**/*')
     .pipe(gulpif(gutil.env.env === 'production',
       function() {
+        // TODO: Data obtained from local CSV.
+        
         if( process.env.SOCRATA_APP_TOKEN ) {
           return replace('bjp8KrRvAPtuf809u1UXnI0Z8',process.env.SOCRATA_APP_TOKEN);
         } else {
           gutil.log(gutils.colors.red('You need to set the SOCRATA_APP_TOKEN environment variable!'));
           gutil.beep();
           return gutil.noop();
-        }
+        }                                                                
       }
     ))
     .pipe(gulp.dest(config.paths.build + '/js'));
@@ -62,10 +66,17 @@ gulp.task('bower', function() {
     .pipe(gulp.dest(config.paths.build + '/bower_components'));
 });
 
+gulp.task('wiredep', function() {
+  return gulp.src('src/*.html')
+    .pipe(wiredep())
+    .pipe(gulp.dest('src'));
+});
+
 // HTML
 gulp.task('html:clean', function(next) {
   del(config.paths.build + '/**/*.html', next);
 });
+
 gulp.task('html', ['html:clean', 'bower'], function() {
   return gulp.src(config.paths.app + '/**/*.html')
     .pipe(wiredep({ignorePath: '../'+config.paths.build+'/'}))
@@ -73,7 +84,7 @@ gulp.task('html', ['html:clean', 'bower'], function() {
       function() {
         if( process.env.GA_TRACKING_ID ) {
           return googleAnalytics({
-            url: 'labs.atsid.com/mayors-hotline-explorer',
+            url: 'labs.atsid.com/nibrs-rfi',
             uid: process.env.GA_TRACKING_ID,
             tag: 'body'
           });
@@ -85,6 +96,31 @@ gulp.task('html', ['html:clean', 'bower'], function() {
       }
     ))
     .pipe(gulp.dest(config.paths.build));
+});
+
+// Developing
+gulp.task('serve', function () {
+  
+    browserSync({
+        notify: false,
+        online: true,
+        port: 9000,
+        server: {
+            baseDir: ['src'],
+            routes: {
+                '/bower_components': 'bower_components'
+            }
+        }
+    });
+
+  gulp.watch([
+    'src/*.html',
+    'src/js/**/*.js',
+    'src/img/**/*'
+  ]).on('change', reload);
+
+  gulp.watch('src/css/**/*.css');
+  gulp.watch('bower.json', ['wiredep']);
 });
 
 // Deploy
