@@ -17,8 +17,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
     var utils = NIBRS.module.utils;
     
     var dateChart = dc.lineChart("#date-chart");
-    //var hourChart = dc.barChart("#hour-chart");
-    //var dayChart = dc.rowChart("#day-chart");
+    var hourChart = dc.barChart("#hour-chart");
+    var dayChart = dc.rowChart("#day-chart");
     //var sourceChart = dc.rowChart("#source-chart");
     //var statusChart = dc.rowChart("#status-chart");
     //var neighborhoodChart = dc.rowChart("#neighborhood-chart");
@@ -29,8 +29,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
     var allCharts = [
         { chart: dateChart, id: "#date-chart" },
-        //{ chart: hourChart, id: "#hour-chart" },
-        //{ chart: dayChart, id: "#day-chart" },
+        { chart: hourChart, id: "#hour-chart" },
+        { chart: dayChart, id: "#day-chart" },
         //{ chart: sourceChart, id: "#source-chart" },
         //{ chart: statusChart, id: "#status-chart" },
         //{ chart: neighborhoodChart, id: "#neighborhood-chart" },
@@ -45,36 +45,31 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         //updateMap(locations.top(Infinity));
     }
 
+    var minDateLength = '1 Jan 14'.length;
     performance.mark('Start');
     function getNIBRSData() {
         return new Promise(function (resolve, reject) {
-            var dateFormat = d3.time.format("%m/%d/%Y"),
-                dateTimeFormat = d3.time.format("%m/%d/%Y %H %p"),
-                dateRegex = /(\d{2})-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)-(\d{2})/i,
-                ageRegex = /(\d)-+/;
-            
             d3.csv('../data/mu_nibrs2-slim.csv',
-                function(d) {
-                    var incidentDateStr = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? utils.replaceAll(d.INCIDENT_DATE, '-', ' ') : ''
-                    //incidentDateParts = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? (d.INCIDENT_DATE.match(dateRegex)||[]) : []
-                    //arrestDateParts = d.ARREST_DATE && d.ARREST_DATE.length ? (d.ARREST_DATE.match(dateRegex)||[]) : [],
-                    //victimAgeParts = d.VICTIM_AGE && d.VICTIM_AGE.length ? (d.VICTIM_AGE.match(ageRegex)||[]) : [],
-                    //offenderAgeParts = d.OFFENDER_AGE && d.OFFENDER_AGE.length ? (d.OFFENDER_AGE.match(ageRegex)||[]) : [],
-                    //arresteeAgeParts = d.ARRESTEE_AGE && d.ARRESTEE_AGE.length ? (d.ARRESTEE_AGE.match(ageRegex)||[]) : []
-                        ;
+                function(incident) {
+                    var incidentDateStr = incident.INCIDENT_DATE && incident.INCIDENT_DATE.length ?
+                                          utils.replaceAll(incident.INCIDENT_DATE, '-', ' ') : '';
                     
-                    if (incidentDateStr.length) {
+                    if (incidentDateStr.length >= minDateLength) {
                         var incidentDate = new Date(incidentDateStr);
                         if (incidentDate >= thirtyDaysFrom.thirtyDaysAgo) {
-                            d.INCIDENT_HOUR = d.INCIDENT_HOUR && d.INCIDENT_HOUR.length ? d.INCIDENT_HOUR : 0;
-                            //var incidentDateTime = new Date(incidentDateStr + ' ' + d.INCIDENT_HOUR + ':00:00');
-                            incidentDate.setHours(d.INCIDENT_HOUR);
-                            d.INCIDENT_DATE_HOUR = d3.time.hour(incidentDate);
-
-                            //d.OFFENSE = d.OFFENSE && d.OFFENSE.length ? offenses[d.OFFENSE.trim()] : "";
-                            //d.LOCATION = d.LOCATION && d.LOCATION.length ? locations[d.LOCATION.trim()] : "";
-                            //d.VICTIM_AGE = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
-                            //d.OFFENDER_AGE = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
+                            var retainedIncident = {};
+                            
+                            retainedIncident.hour = incident.INCIDENT_HOUR && incident.INCIDENT_HOUR.length ?
+                                                    incident.INCIDENT_HOUR : 0;
+                            
+                            incidentDate.setHours(retainedIncident.hour);
+                            
+                            retainedIncident.dateHour = d3.time.hour(incidentDate);
+                            
+                            //retainedIncident.offense = incident.OFFENSE && incident.OFFENSE.length ? offenses[incident.OFFENSE.trim()] : "";
+                            //retainedIncident.location = incident.LOCATION && incident.LOCATION.length ? locations[incident.LOCATION.trim()] : "";
+                            //retainedIncident.victimAge = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
+                            //retainedIncident.offenderAge = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
 
                             //var arrestDate = arrestDateParts.length >= 4 ?
                             //                 new Date(arrestDateParts[1] + ' ' +
@@ -82,10 +77,10 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                             //                          arrestDateParts[3]) :
                             //                 null;
                             //
-                            //d.ARREST_DATE = arrestDate ? dateFormat(arrestDate) : "";
-                            //d.ARRESTEE_AGE = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
+                            //retainedIncident.arrestDate = arrestDate ? dateFormat(arrestDate) : "";
+                            //retainedIncident.arresteeAge = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
 
-                            return { INCIDENT_DATE_HOUR: d.INCIDENT_DATE_HOUR };
+                            return retainedIncident;
                         }
                     }
                 },
@@ -107,7 +102,9 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             performance.mark('Data loaded.');
             
             var graphLineColor = "#1a8bba",
+                dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
                 index = crossfilter(nibrsData);
+            
             performance.mark('Cross-Filter loaded.');
 
             var all = index.groupAll();
@@ -118,30 +115,35 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .group(all);
 
             var
-            //dataYear = index.dimension( function(d) { return d.DATA_YEAR; }),
-            //month = index.dimension( function(d) { return d.MONTH_NUM; }),
-            //incidentDate = index.dimension( function(d) { return d.INCIDENT_DATE; }),
-                incidentDateTime = index.dimension(function (d) {
-                    return d.INCIDENT_DATE_HOUR;
-                })
-            //hour = index.dimension( function(d) { return d.INCIDENT_HOUR; }),
-            //offense = index.dimension( function(d) { return d.OFFENSE; }),
-            //location = index.dimension( function(d) { return d.LOCATION; }),
-            //weapon = index.dimension( function(d) { return d.WEAPON; }),
-            //victimSex = index.dimension( function(d) { return d.VICTIM_SEX; }),
-            //victimRace = index.dimension( function(d) { return d.VICTIM_RACE; }),
-            //victimEthnicity = index.dimension( function(d) { return d.VICTIM_ETHN; }),
-            //victimAge = index.dimension( function(d) { return d.VICTIM_AGE; }),
-            //offenderSex = index.dimension( function(d) { return d.OFFENDER_SEX; }),
-            //offenderRace = index.dimension( function(d) { return d.OFFENDER_RACE; }),
-            //offenderEthnicity = index.dimension( function(d) { return d.OFFENDER_ETHN; }),
-            //offenderAge = index.dimension( function(d) { return d.OFFENDER_AGE; }),
-            //relationship = index.dimension( function(d) { return d.RELATIONSHIP_NAME; }),
-            //arrestDate = index.dimension( function(d) { return d.ARREST_DATE; }),
-            //arresteeAge = index.dimension( function(d) { return d.ARRESTEE_AGE; }),
-            //arrestSex = index.dimension( function(d) { return d.ARREST_SEX; }),
-            //arresteeRace = index.dimension( function(d) { return d.ARRESTEE_RACE; }),
-            //arresteeEthnicity = index.dimension( function(d) { return d.ARRESTEE_ETHN; })
+            //dataYear = index.dimension( function(incident) { return incident.DATA_YEAR; }),
+            //month = index.dimension( function(incident) { return incident.MONTH_NUM; }),
+            //incidentDate = index.dimension( function(incident) { return incident.INCIDENT_DATE; }),
+                incidentDateTime = index.dimension(function (incident) {
+                    return incident.dateHour;
+                }),
+                incidentDays = index.dimension( function(incident) { 
+                    var day = incident.dateHour.getDay();
+                    return day + '.' + dayName[day];
+                }),
+                incidentHours = index.dimension( function(incident) { return incident.hour; })
+            
+            //offense = index.dimension( function(incident) { return incident.OFFENSE; }),
+            //location = index.dimension( function(incident) { return incident.LOCATION; }),
+            //weapon = index.dimension( function(incident) { return incident.WEAPON; }),
+            //victimSex = index.dimension( function(incident) { return incident.VICTIM_SEX; }),
+            //victimRace = index.dimension( function(incident) { return incident.VICTIM_RACE; }),
+            //victimEthnicity = index.dimension( function(incident) { return incident.VICTIM_ETHN; }),
+            //victimAge = index.dimension( function(incident) { return incident.VICTIM_AGE; }),
+            //offenderSex = index.dimension( function(incident) { return incident.OFFENDER_SEX; }),
+            //offenderRace = index.dimension( function(incident) { return incident.OFFENDER_RACE; }),
+            //offenderEthnicity = index.dimension( function(incident) { return incident.OFFENDER_ETHN; }),
+            //offenderAge = index.dimension( function(incident) { return incident.OFFENDER_AGE; }),
+            //relationship = index.dimension( function(incident) { return incident.RELATIONSHIP_NAME; }),
+            //arrestDate = index.dimension( function(incident) { return incident.ARREST_DATE; }),
+            //arresteeAge = index.dimension( function(incident) { return incident.ARRESTEE_AGE; }),
+            //arrestSex = index.dimension( function(incident) { return incident.ARREST_SEX; }),
+            //arresteeRace = index.dimension( function(incident) { return incident.ARRESTEE_RACE; }),
+            //arresteeEthnicity = index.dimension( function(incident) { return incident.ARRESTEE_ETHN; })
                 ;
 
             performance.mark('Dimensions created.');
@@ -160,16 +162,15 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             dateChart.on("postRedraw", onFiltered);
 
             performance.mark('dateChart created.');
-
-/*
+            
             hourChart
                 .width($('#hour-chart').innerWidth() - 30)
                 .height(250)
                 .margins({ top: 10, left: 35, right: 10, bottom: 20 })
                 .x(d3.scale.linear().domain([1, 24]))
                 .colors([graphLineColor])
-                .dimension(open_hours)
-                .group(open_hours.group())
+                .dimension(incidentHours)
+                .group(incidentHours.group())
                 .gap(1)
                 .elasticY(true);
 
@@ -184,12 +185,14 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                     return i.key.split('.')[1] + ': ' + i.value;
                 })
                 .colors([graphLineColor])
-                .dimension(open_days)
-                .group(open_days.group())
+                .dimension(incidentDays)
+                .group(incidentDays.group())
                 .elasticX(true)
                 .gap(1)
                 .xAxis().ticks(0);
 
+            /*
+            
             statusChart
                 .width($('#status-chart').innerWidth() - 30)
                 .height(60)
