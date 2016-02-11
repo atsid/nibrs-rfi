@@ -37,28 +37,66 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         //{ chart: reasonChart, id: "#reason-chart" },
         //{ chart: openDaysChart, id: "#opendays-chart" }
     ];
-
-    var graphLineColor = "#1a8bba",
-        dateFormat = d3.time.format("%m/%d/%Y"),
-        dateTimeFormat = d3.time.format("%m/%d/%Y %H %p"),
-        dateRegex = /(\d{2})-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)-(\d{2})/i,
-        ageRegex = /(\d)-+/;
-
-    var onFiltered = function (chart, filter) {
+    
+    var endDate = new Date('7/1/2014'),
+        thirtyDaysFrom = utils.getDate30DaysFrom(endDate);
+    
+    function onFiltered(chart, filter) {
         //updateMap(locations.top(Infinity));
-    };
+    }
 
     performance.mark('Start');
     function getNIBRSData() {
         return new Promise(function (resolve, reject) {
-            d3.csv('../data/mu_nibrs2-slim.csv', function (err, data) {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(data);
-                }
-            });
+            var dateFormat = d3.time.format("%m/%d/%Y"),
+                dateTimeFormat = d3.time.format("%m/%d/%Y %H %p"),
+                dateRegex = /(\d{2})-(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)-(\d{2})/i,
+                ageRegex = /(\d)-+/;
+            
+            d3.csv('../data/mu_nibrs2-slim.csv',
+                function(d) {
+                    var incidentDateStr = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? utils.replaceAll(d.INCIDENT_DATE, '-', ' ') : ''
+                    //incidentDateParts = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? (d.INCIDENT_DATE.match(dateRegex)||[]) : []
+                    //arrestDateParts = d.ARREST_DATE && d.ARREST_DATE.length ? (d.ARREST_DATE.match(dateRegex)||[]) : [],
+                    //victimAgeParts = d.VICTIM_AGE && d.VICTIM_AGE.length ? (d.VICTIM_AGE.match(ageRegex)||[]) : [],
+                    //offenderAgeParts = d.OFFENDER_AGE && d.OFFENDER_AGE.length ? (d.OFFENDER_AGE.match(ageRegex)||[]) : [],
+                    //arresteeAgeParts = d.ARRESTEE_AGE && d.ARRESTEE_AGE.length ? (d.ARRESTEE_AGE.match(ageRegex)||[]) : []
+                        ;
+                    
+                    if (incidentDateStr.length) {
+                        var incidentDate = new Date(incidentDateStr);
+                        if (incidentDate >= thirtyDaysFrom.thirtyDaysAgo) {
+                            d.INCIDENT_HOUR = d.INCIDENT_HOUR && d.INCIDENT_HOUR.length ? d.INCIDENT_HOUR : 0;
+                            //var incidentDateTime = new Date(incidentDateStr + ' ' + d.INCIDENT_HOUR + ':00:00');
+                            incidentDate.setHours(d.INCIDENT_HOUR);
+                            d.INCIDENT_DATE_HOUR = d3.time.hour(incidentDate);
+
+                            //d.OFFENSE = d.OFFENSE && d.OFFENSE.length ? offenses[d.OFFENSE.trim()] : "";
+                            //d.LOCATION = d.LOCATION && d.LOCATION.length ? locations[d.LOCATION.trim()] : "";
+                            //d.VICTIM_AGE = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
+                            //d.OFFENDER_AGE = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
+
+                            //var arrestDate = arrestDateParts.length >= 4 ?
+                            //                 new Date(arrestDateParts[1] + ' ' +
+                            //                          arrestDateParts[2] + ' ' +
+                            //                          arrestDateParts[3]) :
+                            //                 null;
+                            //
+                            //d.ARREST_DATE = arrestDate ? dateFormat(arrestDate) : "";
+                            //d.ARRESTEE_AGE = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
+
+                            return { INCIDENT_DATE_HOUR: d.INCIDENT_DATE_HOUR };
+                        }
+                    }
+                },
+                function (err, data) {
+                    if (err) {
+                        reject(err);
+                    }
+                    else {
+                        resolve(data);
+                    }
+                });
         });
     }
 
@@ -67,39 +105,9 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                  getNIBRSData()])
         .spread(function (locations, offenses, nibrsData) {
             performance.mark('Data loaded.');
-
-            nibrsData.forEach(function (d) {
-                var incidentDate = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? utils.replaceAll(d.INCIDENT_DATE, '-', ' ') : ''
-                //incidentDateParts = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? (d.INCIDENT_DATE.match(dateRegex)||[]) : []
-                //arrestDateParts = d.ARREST_DATE && d.ARREST_DATE.length ? (d.ARREST_DATE.match(dateRegex)||[]) : [],
-                //victimAgeParts = d.VICTIM_AGE && d.VICTIM_AGE.length ? (d.VICTIM_AGE.match(ageRegex)||[]) : [],
-                //offenderAgeParts = d.OFFENDER_AGE && d.OFFENDER_AGE.length ? (d.OFFENDER_AGE.match(ageRegex)||[]) : [],
-                //arresteeAgeParts = d.ARRESTEE_AGE && d.ARRESTEE_AGE.length ? (d.ARRESTEE_AGE.match(ageRegex)||[]) : []
-                    ;
-
-                d.INCIDENT_HOUR = d.INCIDENT_HOUR && d.INCIDENT_HOUR.length ? d.INCIDENT_HOUR : 0;
-                var incidentDateTime = incidentDate.length ?
-                                       new Date(incidentDate + ' ' + d.INCIDENT_HOUR + ':00:00') :
-                                       null;
-                d.INCIDENT_DATE_HOUR = incidentDateTime ? d3.time.hour(incidentDateTime) : "";
-
-                //d.OFFENSE = d.OFFENSE && d.OFFENSE.length ? offenses[d.OFFENSE.trim()] : "";
-                //d.LOCATION = d.LOCATION && d.LOCATION.length ? locations[d.LOCATION.trim()] : "";
-                //d.VICTIM_AGE = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
-                //d.OFFENDER_AGE = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
-
-                //var arrestDate = arrestDateParts.length >= 4 ?
-                //                 new Date(arrestDateParts[1] + ' ' +
-                //                          arrestDateParts[2] + ' ' +
-                //                          arrestDateParts[3]) :
-                //                 null;
-                //
-                //d.ARREST_DATE = arrestDate ? dateFormat(arrestDate) : "";
-                //d.ARRESTEE_AGE = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
-            });
-            performance.mark('Data massaged.');
-
-            var index = crossfilter(nibrsData);
+            
+            var graphLineColor = "#1a8bba",
+                index = crossfilter(nibrsData);
             performance.mark('Cross-Filter loaded.');
 
             var all = index.groupAll();
@@ -138,13 +146,11 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
             performance.mark('Dimensions created.');
 
-            var thirtyDaysAgo = utils.getDate30DaysFrom(new Date('7/1/2014'));
-            
             dateChart
                 .width($('#date-chart').innerWidth() - 30)
                 .height(200)
                 .margins({ top: 10, left: 30, right: 10, bottom: 20 })
-                .x(d3.time.scale().domain([thirtyDaysAgo.thirtyDaysAgo, thirtyDaysAgo.from]))
+                .x(d3.time.scale().domain([thirtyDaysFrom.thirtyDaysAgo, endDate]))
                 .colors([graphLineColor])
                 .dimension(incidentDateTime)
                 .group(incidentDateTime.group())

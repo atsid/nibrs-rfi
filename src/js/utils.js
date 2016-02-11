@@ -47,12 +47,8 @@ NIBRS.namespace('utils', function (utils, $) {
             'Start',
             'Data loaded.');
         performance.measure(
-            'Data massaged.',
-            'Data loaded.',
-            'Data massaged.');
-        performance.measure(
             'Cross-Filter loaded.',
-            'Data massaged.',
+            'Data loaded.',
             'Cross-Filter loaded.');
         performance.measure(
             'Cross-Filter grouped.',
