@@ -19,6 +19,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
     var dateChart = dc.lineChart("#date-chart");
     var hourChart = dc.barChart("#hour-chart");
     var dayChart = dc.rowChart("#day-chart");
+    var sexByAgeChart = dc.barChart("#sex-by-age-chart");
     //var sourceChart = dc.rowChart("#source-chart");
     //var statusChart = dc.rowChart("#status-chart");
     var locationChart = dc.rowChart("#location-chart");
@@ -48,6 +49,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
     performance.mark('Start');
     function getNIBRSData() {
+        var ageRegex = /(\d)-+/;
+        
         return new Promise(function (resolve, reject) {
             d3.csv('../data/mu_nibrs2-slim.csv',
                 function(incident) {
@@ -56,13 +59,16 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                     
                     if (incidentDateStr.length >= minDateLength) {
                         var incidentDate = new Date(incidentDateStr);
+          
                         if (incidentDate >= thirtyDaysFrom.thirtyDaysAgo) {
                             var incidentHour = incident.INCIDENT_HOUR && incident.INCIDENT_HOUR.length ?
-                                               incident.INCIDENT_HOUR : 0;
+                                               incident.INCIDENT_HOUR : 0,
+                                offenderAgeParts = d.OFFENDER_AGE && d.OFFENDER_AGE.length ?
+                                                   (d.OFFENDER_AGE.match(ageRegex)||[]) : [];
+          
                             incidentDate.setHours(incidentHour);
-                                                        
+                            
                             //retainedIncident.victimAge = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
-                            //retainedIncident.offenderAge = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
 
                             //var arrestDate = arrestDateParts.length >= 4 ?
                             //                 new Date(arrestDateParts[1] + ' ' +
@@ -74,12 +80,15 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                             //retainedIncident.arresteeAge = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
                             
                             return {
-                                hour: incidentHour,
-                                dateHour: d3.time.hour(incidentDate),
-                                offense:  incident.OFFENSE && incident.OFFENSE.length ?
-                                          incident.OFFENSE.trim() : "",
-                                location: incident.LOCATION && incident.LOCATION.length ?
-                                          incident.LOCATION.trim() : ""
+                                hour       : incidentHour,
+                                dateHour   : d3.time.hour(incidentDate),
+                                offense    : incident.OFFENSE && incident.OFFENSE.length ?
+                                             incident.OFFENSE.trim() : "",
+                                location   : incident.LOCATION && incident.LOCATION.length ?
+                                             incident.LOCATION.trim() : "",
+                                offenderAge: offenderAgeParts.length >= 2 ?
+                                             offenderAgeParts[1] : "",
+                                offenderSex: incident.OFFENDER_SEX
                             };
                         }
                     }
@@ -133,17 +142,17 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 }),
                 location = index.dimension( function(incident) {
                     return locations[incident.location];
-                })
+                }),
                 
             //weapon = index.dimension( function(incident) { return incident.WEAPON; }),
             //victimSex = index.dimension( function(incident) { return incident.VICTIM_SEX; }),
             //victimRace = index.dimension( function(incident) { return incident.VICTIM_RACE; }),
             //victimEthnicity = index.dimension( function(incident) { return incident.VICTIM_ETHN; }),
             //victimAge = index.dimension( function(incident) { return incident.VICTIM_AGE; }),
-            //offenderSex = index.dimension( function(incident) { return incident.OFFENDER_SEX; }),
+            offenderSex = index.dimension( function(incident) { return incident.OFFENDER_SEX; }),
             //offenderRace = index.dimension( function(incident) { return incident.OFFENDER_RACE; }),
             //offenderEthnicity = index.dimension( function(incident) { return incident.OFFENDER_ETHN; }),
-            //offenderAge = index.dimension( function(incident) { return incident.OFFENDER_AGE; }),
+            offenderAge = index.dimension( function(incident) { return incident.OFFENDER_AGE; })
             //relationship = index.dimension( function(incident) { return incident.RELATIONSHIP_NAME; }),
             //arrestDate = index.dimension( function(incident) { return incident.ARREST_DATE; }),
             //arresteeAge = index.dimension( function(incident) { return incident.ARRESTEE_AGE; }),
@@ -197,6 +206,78 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .gap(1)
                 .xAxis().ticks(0);
 
+            var crimeIncidentByYear = years.group().reduce(
+                function(p, v) {
+                    if (isTotalCrimeRateRecord(v)) {
+                        p.totalCrimeRecords++;
+                        p.totalCrime += +v.number;
+                        p.totalCrimeAvg = p.totalCrime / p.totalCrimeRecords;
+                    }
+                    if (isViolentCrimeRateRecord(v)) {
+                        p.violentCrimeRecords++;
+                        p.violentCrime += +v.number;
+                        p.violentCrimeAvg = p.violentCrime / p.violentCrimeRecords;
+                    }
+                    if(isHomicideIncidentRecord(v)){
+                        p.homicide += +v.number;
+                    }
+                    p.nonViolentCrimeAvg = p.totalCrimeAvg - p.violentCrimeAvg;
+                    return p;
+                },
+                function(p, v) {
+                    if (isTotalCrimeRateRecord(v)) {
+                        p.totalCrimeRecords--;
+                        p.totalCrime -= +v.number;
+                        p.totalCrimeAvg = p.totalCrime / p.totalCrimeRecords;
+                    }
+                    if (isViolentCrimeRateRecord(v)) {
+                        p.violentCrimeRecords--;
+                        p.violentCrime -= +v.number;
+                        p.violentCrimeAvg = p.violentCrime / p.violentCrimeRecords;
+                    }
+                    if(isHomicideIncidentRecord(v)){
+                        p.homicide -= +v.number;
+                    }
+                    p.nonViolentCrimeAvg = p.totalCrimeAvg - p.violentCrimeAvg;
+                    return p;
+                },
+                function() {
+                    return {
+                        totalCrimeRecords:0,
+                        totalCrime:0,
+                        totalCrimeAvg:0,
+                        violentCrimeRecords:0,
+                        violentCrime:0,
+                        violentCrimeAvg:0,
+                        homicide:0,
+                        nonViolentCrimeAvg:0
+                    };
+                }
+            );
+
+            sexByAgeChart
+                .width(360)
+                .height(180)
+                .margins({top: 40, right: 50, bottom: 30, left: 60})
+                .dimension(years)
+                .group(crimeIncidentByYear, "Non-Violent Crime")
+                .valueAccessor(function(d) {
+                    return d.value.nonViolentCrimeAvg;
+                })
+                .stack(crimeIncidentByYear, "Violent Crime", function(d){return d.value.violentCrimeAvg;})
+                .x(d3.scale.linear().domain([1997, 2012]))
+                .renderHorizontalGridLines(true)
+                .centerBar(true)
+                .elasticY(true)
+                .brushOn(false)
+                .legend(dc.legend().x(250).y(10))
+                .title(function(d){
+                    return d.key
+                           + "\nViolent crime per 100k population: " + Math.round(d.value.violentCrimeAvg)
+                           + "\nNon-Violent crime per 100k population: " + Math.round(d.value.nonViolentCrimeAvg);
+                })
+                .xAxis().ticks(5).tickFormat(d3.format("d"));
+            
             /*
             
             statusChart
