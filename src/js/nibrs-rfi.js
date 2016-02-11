@@ -47,12 +47,65 @@
     };
     Promise.spread = spread;
 
+    function replaceAll(string, omit, place, prevstring) {
+        if (prevstring && string === prevstring)
+            return string;
+        prevstring = string.replace(omit, place);
+        return replaceAll(prevstring, omit, place, string)
+    }
+
+    function measure() {
+        performance.measure(
+            'Locations/Offenses loaded',
+            'Start',
+            'Locations/Offenses loaded');
+        performance.measure(
+            'CSV loaded',
+            'Locations/Offenses loaded',
+            'CSV loaded');
+        performance.measure(
+            'Data massaged.',
+            'CSV loaded',
+            'Data massaged.');
+        performance.measure(
+            'Cross-Filter loaded.',
+            'Data massaged.',
+            'Cross-Filter loaded.');
+        performance.measure(
+            'Cross-Filter grouped.',
+            'Cross-Filter loaded.',
+            'Cross-Filter grouped.');
+        performance.measure(
+            'Dimensions created.',
+            'Cross-Filter grouped.',
+            'Dimensions created.');
+        performance.measure(
+            'dateChart created.',
+            'Dimensions created.',
+            'dateChart created.');
+        
+        var perfMeasures = performance.getEntriesByType("measure");
+        _.each(_.sortBy(perfMeasures, ['startTime', 'name']), function (perfMeasure) {
+            console.info(perfMeasure.name + ': ' +
+                         parseFloat(perfMeasure.duration).toFixed(2) + 'ms');
+        });
+        
+        performance.clearMeasures();
+        performance.clearMarks();
+    }
+    
+    performance.mark('Start');
+    
     Promise.all([ $.getJSON('../data/locations.json'), $.getJSON('../data/offenses.json') ])
         .spread(function(locations, offenses) {
+            performance.mark('Locations/Offenses loaded');
             
             d3.csv('../data/mu_nibrs2-slim.csv', function (err, data) {
+                performance.mark('CSV loaded');
                 data.forEach(function (d) {
-                    var incidentDateParts = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? (d.INCIDENT_DATE.match(dateRegex)||[]) : []
+                    var 
+                        incidentDate = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? replaceAll(d.INCIDENT_DATE, '-', ' ') : ''
+                        //incidentDateParts = d.INCIDENT_DATE && d.INCIDENT_DATE.length ? (d.INCIDENT_DATE.match(dateRegex)||[]) : []
                         //arrestDateParts = d.ARREST_DATE && d.ARREST_DATE.length ? (d.ARREST_DATE.match(dateRegex)||[]) : [],
                         //victimAgeParts = d.VICTIM_AGE && d.VICTIM_AGE.length ? (d.VICTIM_AGE.match(ageRegex)||[]) : [],
                         //offenderAgeParts = d.OFFENDER_AGE && d.OFFENDER_AGE.length ? (d.OFFENDER_AGE.match(ageRegex)||[]) : [],
@@ -60,12 +113,9 @@
                         ;
         
                     d.INCIDENT_HOUR = d.INCIDENT_HOUR && d.INCIDENT_HOUR.length ? d.INCIDENT_HOUR : 0;
-                    var incidentDateTime = incidentDateParts.length >= 4 ?
-                                       new Date(incidentDateParts[1] + ' ' +
-                                                incidentDateParts[2] + ' ' +
-                                                incidentDateParts[3] + ' ' +
-                                                d.INCIDENT_HOUR + ':00:00') :
-                                       null;
+                    var incidentDateTime = incidentDate.length  ?
+                                           new Date(incidentDate + ' ' + d.INCIDENT_HOUR + ':00:00') :
+                                           null;
                     //d.INCIDENT_DATE = incidentDateTime ? dateFormat(incidentDateTime) : "";
                     d.INCIDENT_DATE_HOUR = incidentDateTime ? incidentDateTime : "";
                     
@@ -84,8 +134,16 @@
                     //d.ARRESTEE_AGE = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
                 });
         
-                var index = crossfilter(data),
-                    all = index.groupAll(),
+                performance.mark('Data massaged.');
+                
+                var index = crossfilter(data);
+                
+                performance.mark('Cross-Filter loaded.');
+                
+                var all = index.groupAll();
+                performance.mark('Cross-Filter grouped.');
+                
+                var
                     //dataYear = index.dimension( function(d) { return d.DATA_YEAR; }),
                     //month = index.dimension( function(d) { return d.MONTH_NUM; }),
                     //incidentDate = index.dimension( function(d) { return d.INCIDENT_DATE; }),
@@ -110,24 +168,27 @@
                     //arresteeEthnicity = index.dimension( function(d) { return d.ARRESTEE_ETHN; })
                 ;
                     
+                performance.mark('Dimensions created.');
                     
               dataCount
                 .dimension(index)
                 .group(all);
-            
-              dateChart
-                .width($('#date-chart').innerWidth()-30)
-                .height(200)
-                .margins({top: 10, left:30, right: 10, bottom:20})
-                .x(d3.time.scale().domain([thirty_days_ago, lastDataDay]))
-                .colors(singleColor)
-                .dimension(incidentDateTime)
-                .group(incidentDateTime.group())
-                .renderArea(true)
-                .elasticY(true)
-                .yAxis().ticks(6);
-              dateChart.on("postRedraw", onFiltered);
 
+                dateChart
+                    .width($('#date-chart').innerWidth()-30)
+                    .height(200)
+                    .margins({top: 10, left:30, right: 10, bottom:20})
+                    .x(d3.time.scale().domain([thirty_days_ago, lastDataDay]))
+                    .colors(singleColor)
+                    .dimension(incidentDateTime)
+                    .group(incidentDateTime.group())
+                    .renderArea(true)
+                    .elasticY(true)
+                    .yAxis().ticks(6);
+                dateChart.on("postRedraw", onFiltered);
+
+                performance.mark('dateChart created.');
+                
                 /*
             
               hourChart
@@ -234,7 +295,7 @@
                 .order(d3.descending); 
             */
                 dc.renderAll();
-        
+                measure();
             });
         
             
