@@ -10,6 +10,10 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         concat: {
+            options: {
+                process: true,
+                sourceMap: true
+            },
             js: {
                 src: jsFiles,
                 dest: output.js
@@ -20,10 +24,21 @@ module.exports = function (grunt) {
                 options: {
                     mangle: true,
                     compress: true,
-                    sourceMap: output.map
+                    sourceMap: true
                 },
                 src: output.js,
                 dest: output.jsmin
+            }
+        },
+        cssmin: {
+            options: {
+                shorthandCompacting: false,
+                roundingPrecision: -1
+            },
+            main: {
+                files: {
+                    'dc.min.css': ['dc.css']
+                }
             }
         },
         sed: {
@@ -96,6 +111,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-copy');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-docco2');
     grunt.loadNpmTasks('grunt-gh-pages');
     grunt.loadNpmTasks('grunt-markdown');
@@ -112,7 +128,7 @@ module.exports = function (grunt) {
         grunt.log.writeln('File "' + destFile + '" created.');
     });
 
-    grunt.registerTask('default', ['concat', 'uglify', 'sed', 'copy']);
+    grunt.registerTask('default', ['concat', 'uglify', 'cssmin', 'sed', 'copy']);
     grunt.registerTask('docs', ['default', 'emu', 'markdown']);
     grunt.registerTask('web', ['docs', 'gh-pages']);
     grunt.registerTask('test', ['default', 'vows']);
