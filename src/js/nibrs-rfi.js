@@ -21,8 +21,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
     var dayChart = dc.rowChart("#day-chart");
     //var sourceChart = dc.rowChart("#source-chart");
     //var statusChart = dc.rowChart("#status-chart");
-    //var neighborhoodChart = dc.rowChart("#neighborhood-chart");
-    //var reasonChart = dc.rowChart("#reason-chart");
+    var locationChart = dc.rowChart("#location-chart");
+    var offenseChart = dc.rowChart("#offense-chart");
     //var openDaysChart = dc.rowChart("#opendays-chart");
     //var dataTable = dc.dataTable("#data-table");
     var dataCount = dc.dataCount('.data-count');
@@ -33,19 +33,19 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         { chart: dayChart, id: "#day-chart" },
         //{ chart: sourceChart, id: "#source-chart" },
         //{ chart: statusChart, id: "#status-chart" },
-        //{ chart: neighborhoodChart, id: "#neighborhood-chart" },
-        //{ chart: reasonChart, id: "#reason-chart" },
+        { chart: locationChart, id: "#location-chart" },
+        { chart: offenseChart, id: "#offense-chart" },
         //{ chart: openDaysChart, id: "#opendays-chart" }
     ];
     
     var endDate = new Date('7/1/2014'),
-        thirtyDaysFrom = utils.getDate30DaysFrom(endDate);
+        thirtyDaysFrom = utils.getDate30DaysFrom(endDate),
+        minDateLength = '1 Jan 14'.length;
     
     function onFiltered(chart, filter) {
         //updateMap(locations.top(Infinity));
     }
 
-    var minDateLength = '1 Jan 14'.length;
     performance.mark('Start');
     function getNIBRSData() {
         return new Promise(function (resolve, reject) {
@@ -57,17 +57,10 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                     if (incidentDateStr.length >= minDateLength) {
                         var incidentDate = new Date(incidentDateStr);
                         if (incidentDate >= thirtyDaysFrom.thirtyDaysAgo) {
-                            var retainedIncident = {};
-                            
-                            retainedIncident.hour = incident.INCIDENT_HOUR && incident.INCIDENT_HOUR.length ?
-                                                    incident.INCIDENT_HOUR : 0;
-                            
-                            incidentDate.setHours(retainedIncident.hour);
-                            
-                            retainedIncident.dateHour = d3.time.hour(incidentDate);
-                            
-                            //retainedIncident.offense = incident.OFFENSE && incident.OFFENSE.length ? offenses[incident.OFFENSE.trim()] : "";
-                            //retainedIncident.location = incident.LOCATION && incident.LOCATION.length ? locations[incident.LOCATION.trim()] : "";
+                            var incidentHour = incident.INCIDENT_HOUR && incident.INCIDENT_HOUR.length ?
+                                               incident.INCIDENT_HOUR : 0;
+                            incidentDate.setHours(incidentHour);
+                                                        
                             //retainedIncident.victimAge = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
                             //retainedIncident.offenderAge = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
 
@@ -79,8 +72,15 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                             //
                             //retainedIncident.arrestDate = arrestDate ? dateFormat(arrestDate) : "";
                             //retainedIncident.arresteeAge = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
-
-                            return retainedIncident;
+                            
+                            return {
+                                hour: incidentHour,
+                                dateHour: d3.time.hour(incidentDate),
+                                offense:  incident.OFFENSE && incident.OFFENSE.length ?
+                                          incident.OFFENSE.trim() : "",
+                                location: incident.LOCATION && incident.LOCATION.length ?
+                                          incident.LOCATION.trim() : ""
+                            };
                         }
                     }
                 },
@@ -125,10 +125,16 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                     var day = incident.dateHour.getDay();
                     return day + '.' + dayName[day];
                 }),
-                incidentHours = index.dimension( function(incident) { return incident.hour; })
-            
-            //offense = index.dimension( function(incident) { return incident.OFFENSE; }),
-            //location = index.dimension( function(incident) { return incident.LOCATION; }),
+                incidentHours = index.dimension( function(incident) {
+                    return incident.hour;
+                }),
+                offense = index.dimension( function(incident) {
+                    return offenses[incident.offense];
+                }),
+                location = index.dimension( function(incident) {
+                    return locations[incident.location];
+                })
+                
             //weapon = index.dimension( function(incident) { return incident.WEAPON; }),
             //victimSex = index.dimension( function(incident) { return incident.VICTIM_SEX; }),
             //victimRace = index.dimension( function(incident) { return incident.VICTIM_RACE; }),
@@ -217,14 +223,14 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                     return - i.value;
                 })
                 .xAxis().ticks(0);
-
-            neighborhoodChart
-                .width($('#neighborhood-chart').innerWidth() - 30)
-                .height(435)
+*/
+            locationChart
+                .width($('#location-chart').innerWidth() - 30)
+                .height(700)
                 .margins({ top: 10, left: 5, right: 10, bottom: 20 })
                 .colors([graphLineColor])
-                .group(neighborhoods.group())
-                .dimension(neighborhoods)
+                .group(location.group())
+                .dimension(location)
                 .elasticX(true)
                 .gap(1)
                 .ordering(function (i) {
@@ -233,13 +239,13 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .labelOffsetY(12)
                 .xAxis().ticks(3);
 
-            reasonChart
-                .width($('#reason-chart').innerWidth() - 30)
-                .height(1000)
+            offenseChart
+                .width($('#offense-chart').innerWidth() - 30)
+                .height(700)
                 .margins({ top: 10, left: 5, right: 10, bottom: 20 })
                 .colors([graphLineColor])
-                .group(reasons.group())
-                .dimension(reasons)
+                .group(offense.group())
+                .dimension(offense)
                 .elasticX(true)
                 .gap(1)
                 .ordering(function (i) {
@@ -247,7 +253,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 })
                 .labelOffsetY(12)
                 .xAxis().ticks(3);
-
+/*
             openDaysChart
                 .width($('#opendays-chart').innerWidth() - 30)
                 .height(533)
