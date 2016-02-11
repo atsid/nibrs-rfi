@@ -16,8 +16,8 @@ var reload = browserSync.reload;
 
 var config = {
   paths: {
-    app:   'src'
-    //build: 'dist'
+    app:   'src',
+    build: 'dist'
   }
 };
 
