@@ -117,7 +117,7 @@
                                            new Date(incidentDate + ' ' + d.INCIDENT_HOUR + ':00:00') :
                                            null;
                     //d.INCIDENT_DATE = incidentDateTime ? dateFormat(incidentDateTime) : "";
-                    d.INCIDENT_DATE_HOUR = incidentDateTime ? incidentDateTime : "";
+                    d.INCIDENT_DATE_HOUR = incidentDateTime ? d3.time.hour(incidentDateTime) : "";
                     
                     //d.OFFENSE = d.OFFENSE && d.OFFENSE.length ? offenses[d.OFFENSE.trim()] : "";
                     //d.LOCATION = d.LOCATION && d.LOCATION.length ? locations[d.LOCATION.trim()] : "";
@@ -147,7 +147,7 @@
                     //dataYear = index.dimension( function(d) { return d.DATA_YEAR; }),
                     //month = index.dimension( function(d) { return d.MONTH_NUM; }),
                     //incidentDate = index.dimension( function(d) { return d.INCIDENT_DATE; }),
-                    incidentDateTime = index.dimension( function(d) { return d3.time.hour(d.INCIDENT_DATE_HOUR); })
+                    incidentDateTime = index.dimension( function(d) { return d.INCIDENT_DATE_HOUR; })
                     //hour = index.dimension( function(d) { return d.INCIDENT_HOUR; }),
                     //offense = index.dimension( function(d) { return d.OFFENSE; }),
                     //location = index.dimension( function(d) { return d.LOCATION; }),
