@@ -83,10 +83,6 @@ NIBRS.namespace('utils', function (utils, $) {
         return { from: date, thirtyDaysAgo: thirtyDaysAgo, thirtyDaysAgoISO: thirtyDaysAgoISO };
     }
 
-    function scrubString(dirtyString, defaultValue) {
-        return dirtyString && dirtyString.length ? filed.trim() : (defaultValue||'');
-    }
-    
     utils = {
         replaceAll           : replaceAll,
         getDate30DaysFrom    : getDate30DaysFrom,
