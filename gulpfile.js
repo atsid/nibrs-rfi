@@ -108,7 +108,8 @@ gulp.task('serve', function () {
         server: {
             baseDir: ['src'],
             routes: {
-                '/bower_components': 'bower_components'
+                '/bower_components': 'bower_components',
+                '/data': 'src/data'
             }
         }
     });
@@ -124,7 +125,7 @@ gulp.task('serve', function () {
 });
 
 // Deploy
-gulp.task('deploy', ['build'], function() {
+gulp.task('deploy', [], function() {
   return gulp.src(config.paths.build + '/**/*')
     .pipe(ghPages());
 });

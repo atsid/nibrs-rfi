@@ -4,8 +4,8 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <!-- bower:css -->
-  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-  <link rel="stylesheet" href="bower_components/dcjs/dc.css" />
+  <link rel="stylesheet" href="/bower_components/bootstrap/dist/css/bootstrap.css" />
+  <link rel="stylesheet" href="/bower_components/dcjs/dc.css" />
   <!-- endbower -->
   <link rel="stylesheet" href="css/nibrs-rfi.css">
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -68,7 +68,11 @@
           </div>    
         </div>
         <div class="row">
-          <div id="map"></div>
+            <div class="col-xs-12" id="sex-by-age-chart">
+                <h5>Incident Sex x Age
+                  <a class="reset" href="javascript:sexByAgeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                </h5>
+            </div>
         </div>
       </div>
             
@@ -76,17 +80,17 @@
         <div class="row">
           <div class="col-xs-12 col-sm-6" id="offense-chart">
               <h5>Incident Offense
-                <a class="reset" href="javascript:reasonChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                <a class="reset" href="javascript:offenseChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
               </h5>
           </div>
           <div class="col-xs-12 col-sm-6" id="location-chart">
               <h5>Incident Location
-                <a class="reset" href="javascript:neighborhoodChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                <a class="reset" href="javascript:locationChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
               </h5>
           </div>
-          <div class="col-xs-12 col-sm-6" id="opendays-chart">
+          <div class="col-xs-12 col-sm-6 hidden" id="blank">
               <h5>Incident Sex x Age
-                <a class="reset" href="javascript:openDaysChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                <a class="reset" href="javascript:sexByAgeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
               </h5>
           </div>
         </div>
@@ -130,12 +134,12 @@
   </footer>
 
   <!-- bower:js -->
-  <script src="bower_components/jquery/dist/jquery.js"></script>
-  <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
-  <script src="bower_components/d3/d3.js"></script>
-  <script src="bower_components/crossfilter/crossfilter.js"></script>
-  <script src="bower_components/dcjs/dc.js"></script>
-  <script src="bower_components/lodash/lodash.js"></script>
+  <script src="/bower_components/jquery/dist/jquery.js"></script>
+  <script src="/bower_components/bootstrap/dist/js/bootstrap.js"></script>
+  <script src="/bower_components/d3/d3.js"></script>
+  <script src="/bower_components/crossfilter/crossfilter.js"></script>
+  <script src="/bower_components/dcjs/dc.js"></script>
+  <script src="/bower_components/lodash/lodash.js"></script>
   <!-- endbower -->
   
   <script src="js/app.js"></script>

@@ -19,6 +19,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
     var dateChart = dc.lineChart("#date-chart");
     var hourChart = dc.barChart("#hour-chart");
     var dayChart = dc.rowChart("#day-chart");
+    var sexByAgeChart = dc.barChart("#sex-by-age-chart");
     //var sourceChart = dc.rowChart("#source-chart");
     //var statusChart = dc.rowChart("#status-chart");
     var locationChart = dc.rowChart("#location-chart");
@@ -48,21 +49,24 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
     performance.mark('Start');
     function getNIBRSData() {
+        var ageRegex = /(\d+)-+/;
+        
         return new Promise(function (resolve, reject) {
-            d3.csv('../data/mu_nibrs2-slim.csv',
+            d3.csv('/data/mu_nibrs2-slim.csv',
                 function(incident) {
                     var incidentDateStr = incident.INCIDENT_DATE && incident.INCIDENT_DATE.length ?
                                           utils.replaceAll(incident.INCIDENT_DATE, '-', ' ') : '';
                     
                     if (incidentDateStr.length >= minDateLength) {
                         var incidentDate = new Date(incidentDateStr);
+          
                         if (incidentDate >= thirtyDaysFrom.thirtyDaysAgo) {
-                            var incidentHour = incident.INCIDENT_HOUR && incident.INCIDENT_HOUR.length ?
-                                               incident.INCIDENT_HOUR : 0;
+                            var incidentHour = utils.scrubString(incident.INCIDENT_HOUR, '0'),
+                                offenderAgeParts = (utils.scrubString(incident.OFFENDER_AGE, '').match(ageRegex)||[]);
+          
                             incidentDate.setHours(incidentHour);
-                                                        
+                            
                             //retainedIncident.victimAge = victimAgeParts.length >= 2 ? victimAgeParts[1] : "";
-                            //retainedIncident.offenderAge = offenderAgeParts.length >= 2 ? offenderAgeParts[1] : "";
 
                             //var arrestDate = arrestDateParts.length >= 4 ?
                             //                 new Date(arrestDateParts[1] + ' ' +
@@ -72,15 +76,17 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                             //
                             //retainedIncident.arrestDate = arrestDate ? dateFormat(arrestDate) : "";
                             //retainedIncident.arresteeAge = arresteeAgeParts.length >= 2 ? arresteeAgeParts[1] : "";
-                            
-                            return {
-                                hour: incidentHour,
-                                dateHour: d3.time.hour(incidentDate),
-                                offense:  incident.OFFENSE && incident.OFFENSE.length ?
-                                          incident.OFFENSE.trim() : "",
-                                location: incident.LOCATION && incident.LOCATION.length ?
-                                          incident.LOCATION.trim() : ""
+
+                            var interestingIncident = {
+                                hour       : incidentHour,
+                                dateHour   : d3.time.hour(incidentDate),
+                                offense    : utils.scrubString(incident.OFFENSE),
+                                location   : utils.scrubString(incident.LOCATION),
+                                offenderAge: offenderAgeParts.length >= 2 ?
+                                             offenderAgeParts[1] : "",
+                                offenderSex: utils.scrubString(incident.OFFENDER_SEX, 'U') ,
                             };
+                            return interestingIncident;
                         }
                     }
                 },
@@ -95,8 +101,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         });
     }
 
-    Promise.all([$.getJSON('../data/locations.json'),
-                 $.getJSON('../data/offenses.json'),
+    Promise.all([$.getJSON('/data/locations.json'),
+                 $.getJSON('/data/offenses.json'),
                  getNIBRSData()])
         .spread(function (locations, offenses, nibrsData) {
             performance.mark('Data loaded.');
@@ -133,17 +139,17 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 }),
                 location = index.dimension( function(incident) {
                     return locations[incident.location];
-                })
+                }),
                 
             //weapon = index.dimension( function(incident) { return incident.WEAPON; }),
             //victimSex = index.dimension( function(incident) { return incident.VICTIM_SEX; }),
             //victimRace = index.dimension( function(incident) { return incident.VICTIM_RACE; }),
             //victimEthnicity = index.dimension( function(incident) { return incident.VICTIM_ETHN; }),
             //victimAge = index.dimension( function(incident) { return incident.VICTIM_AGE; }),
-            //offenderSex = index.dimension( function(incident) { return incident.OFFENDER_SEX; }),
+            //offenderSex = index.dimension( function(incident) { return incident.offenderSex; }),
             //offenderRace = index.dimension( function(incident) { return incident.OFFENDER_RACE; }),
             //offenderEthnicity = index.dimension( function(incident) { return incident.OFFENDER_ETHN; }),
-            //offenderAge = index.dimension( function(incident) { return incident.OFFENDER_AGE; }),
+            offenderAge = index.dimension( function(incident) { return incident.offenderAge; })
             //relationship = index.dimension( function(incident) { return incident.RELATIONSHIP_NAME; }),
             //arrestDate = index.dimension( function(incident) { return incident.ARREST_DATE; }),
             //arresteeAge = index.dimension( function(incident) { return incident.ARRESTEE_AGE; }),
@@ -197,6 +203,63 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .gap(1)
                 .xAxis().ticks(0);
 
+            var sexByAge = offenderAge.group().reduce(
+                function(p, v) {
+                    switch(v.offenderSex) {
+                        case 'U': p.unknown++; break;
+                        case 'F': p.female++; break;
+                        case 'M': p.male++; break;
+                    }
+                    return p;
+                },
+                function(p, v) {
+                    switch(v) {
+                        case 'U': p.unknown--; break;
+                        case 'F': p.female--; break;
+                        case 'M': p.male--; break;
+                    }
+                    return p;
+                },
+                function() {
+                    return {
+                        unknown:0,
+                        female:0,
+                        male:0
+                    };
+                }
+            );
+
+            var innerWidth = $('#sex-by-age-chart').innerWidth();
+            sexByAgeChart
+                .width(innerWidth - 30)
+                .height(200)
+                .margins({ top: 40, right: 50, bottom: 30, left: 60 })
+                .dimension(offenderAge)
+                .group(sexByAge, "Unknown")
+                .valueAccessor(function (d) {
+                    return d.value.unknown;
+                })
+                .stack(sexByAge, "Female", function (d) {
+                    return d.value.female;
+                })
+                .stack(sexByAge, "Male", function (d) {
+                    return d.value.male;
+                })
+                .x(d3.scale.linear().domain([5, 80]))
+                .renderHorizontalGridLines(true)
+                .centerBar(true)
+                .elasticY(true)
+                .brushOn(false)
+                .legend(dc.legend().x(innerWidth - 100).y(10))
+                .title(function(d){
+                    return d.key
+                           + "\nMale: " + Math.round(d.data.value.male)
+                           + "\nFemale: " + Math.round(d.data.value.female)
+                           + "\Unknown: " + Math.round(d.data.value.unknown);
+                })
+                //.xAxis().ticks(5).tickFormat(d3.format("d"))
+            ;
+            
             /*
             
             statusChart
@@ -304,7 +367,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             utils.measure();
         })
         .catch(function (reason) {
-            console.error("Failed to load D3 with data: " + reason);
+            utils.handleRejection(reason, "Failed to load D3 with data:")
             utils.clearMarksAndMeasures();
         });
 

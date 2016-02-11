@@ -16,6 +16,58 @@
 NIBRS.namespace('utils', function (utils, $) {
     'use strict';
 
+    var hasCaptureStackTrace = false;
+    try {
+        Error.captureStackTrace({}, '');
+        hasCaptureStackTrace = true;
+    } catch (e) {
+        hasCaptureStackTrace = false;
+    }
+
+    function handleRejection(reason, message) {
+        if (reason instanceof Error) {
+            message = Error.prototype.name +': ' + message;
+            message += '\n' + reason.message;
+            if (_.isUndefined(reason.serviceChain)) {
+                message += '\n' + reason.stack;
+            }
+        }
+        else if (typeof reason === 'string') {
+            message = reason;
+        }
+        else {
+            message = '';
+        }
+        
+        if (hasCaptureStackTrace) {
+            var stackTrace = {};
+            Error.captureStackTrace(stackTrace, handleRejection);
+            var stack = stackTrace.stack;
+            var breadcrumb = stack;
+            // Cut off junk on front of stack string.
+            _.each(['/internal/', 'at eval (', 'Error\n'], function (startOffsetStr) {
+                var start = stack.indexOf(startOffsetStr);
+                if (start > - 1) {
+                    start += startOffsetStr.length;
+                    breadcrumb = stack.substring(start);
+                    return false;
+                }
+            });
+
+            // Cut off junk on end of stack string.
+            _.each([')', '\n'], function (endOffsetStr) {
+                var end = breadcrumb.indexOf(endOffsetStr);
+                if (end > - 1) {
+                    breadcrumb = breadcrumb.substring(0, end);
+                    return false;
+                }
+            });
+            message += 'Breadcrumb: ' + breadcrumb;
+        }
+
+        console.error(message);
+    }
+
     function spread(promises, fulfilled, rejected) {
         return Promise.all(promises).spread(fulfilled, rejected);
     }
@@ -83,10 +135,16 @@ NIBRS.namespace('utils', function (utils, $) {
         return { from: date, thirtyDaysAgo: thirtyDaysAgo, thirtyDaysAgoISO: thirtyDaysAgoISO };
     }
 
+    function scrubString(dirtyString, defaultValue) {
+        return dirtyString && dirtyString.length ? dirtyString.trim() : (defaultValue || '');
+    }
+
     utils = {
         replaceAll           : replaceAll,
+        scrubString          : scrubString,
         getDate30DaysFrom    : getDate30DaysFrom,
         measure              : measure,
+        handleRejection      : handleRejection,
         clearMarksAndMeasures: clearMarksAndMeasures
     };
 
