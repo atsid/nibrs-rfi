@@ -45,32 +45,23 @@
                 <a class="reset" href="javascript:dayChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
               </h5>
           </div>
-          <div class="col-xs-12 col-sm-6" id="hour-chart">
+          <div class="col-sm-9" id="hour-chart">
             <h5>Incident Hour of Day
               <a class="reset" href="javascript:hourChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
             </h5>
           </div>
-          <div class="col-sm-3">
-            <div class="row">
-              <div class="col-xs-12" id="source-chart">
-                <h5>Incident Source
-                  <a class="reset" href="javascript:sourceChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-                </h5>
-              </div>
-            </div><!-- /row -->
-            <div class="row">
-              <div class="col-xs-12" id="status-chart">
-                <h5>Case Status
-                  <a class="reset" href="javascript:statusChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-                </h5>
-              </div>
-            </div>
-          </div>    
         </div>
         <div class="row">
             <div class="col-xs-12" id="sex-by-age-chart">
                 <h5>Incident Sex x Age
                   <a class="reset" href="javascript:sexByAgeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+                </h5>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-xs-12" id="race-by-age-chart">
+                <h5>Incident Race x Age
+                  <a class="reset" href="javascript:raceByAgeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
                 </h5>
             </div>
         </div>
@@ -89,8 +80,8 @@
               </h5>
           </div>
           <div class="col-xs-12 col-sm-6 hidden" id="blank">
-              <h5>Incident Sex x Age
-                <a class="reset" href="javascript:sexByAgeChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+              <h5>Mystery Chart
+                <a class="reset" href="javascript:mysteryChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
               </h5>
           </div>
         </div>
