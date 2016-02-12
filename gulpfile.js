@@ -8,7 +8,6 @@ var gulp = require('gulp'),
     ghPages = require('gulp-gh-pages'),
     wiredep = require('wiredep').stream,
     useref = require('gulp-useref'),
-    gzip = require('gulp-gzip'),
     bower = require('gulp-bower'),
     watch = require('gulp-watch'),
     browserSync = require('browser-sync'),
@@ -36,7 +35,6 @@ gulp.task('data:clean', function (next) {
 });
 gulp.task('data', ['data:clean'], function () {
     return gulp.src(config.paths.app + '/data/**/*')
-        //.pipe(gzip({threshold: '1kb' }))
         .pipe(gulp.dest(config.paths.build + '/data'));
 });
 
@@ -70,7 +68,6 @@ gulp.task('html', ['html:clean'], function () {
                 }
             }
         ))
-        //.pipe(gzip({threshold: '1kb' }))
         .pipe(gulp.dest(config.paths.build));
 });
 
