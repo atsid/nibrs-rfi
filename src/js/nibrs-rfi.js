@@ -29,7 +29,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         raceByAgeChart = dc.barChart("#race-by-age-chart"),
         locationChart = dc.rowChart("#location-chart"),
         offenseChart = dc.rowChart("#offense-chart"),
-        dataCount = dc.dataCount('.data-count');
+        dataCount = dc.dataCount('.data-count'),
+        $resets = $('a.reset');
 
     var allCharts = [
         { chart: dateChart, id: "#date-chart" },
@@ -367,8 +368,12 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             utils.handleRejection(reason, "Failed to load D3 with data:");
             utils.clearMarksAndMeasures();
         });
+
+    _.each($resets, function(reset) {
+        $(reset).css('display', 'none');
+    });
     
-    $('a.reset').on('click', function() {
+    $resets.on('click', function() {
         var chartID = '#' + $(this).closest('.chart').attr('id');
         _.each(allCharts, function(chart) {
             if (chart.id === chartID) {
