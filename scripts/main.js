@@ -241,6 +241,16 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         { chart: offenseChart, id: "#offense-chart" }
     ];
 
+    //map the chart objects onto the window so the HTML reset links work
+    //TODO: map this right with an event selector
+    window.dateChart = dateChart;
+    window.hourChart = hourChart;
+    window.dayChart = dayChart;
+    window.sexByAgeChart = sexByAgeChart;
+    window.raceByAgeChart = raceByAgeChart;
+    window.locationChart = locationChart;
+    window.offenseChart = offenseChart;
+
     function onFiltered(chart, filter) {
         //updateMap(locations.top(Infinity));
     }
@@ -334,7 +344,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             dateChart
                 .width($('#date-chart').innerWidth() - 30)
                 .height(200)
-                .margins({ top: 10, left: 30, right: 10, bottom: 20 })
+                .margins({ top: 10, left: 50, right: 10, bottom: 20 })
                 .x(d3.time.scale().domain([thirtyDaysFrom.thirtyDaysAgo, endDate]))
                 .colors([graphLineColor])
                 .dimension(incidentDateTime)
