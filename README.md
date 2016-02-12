@@ -1,4 +1,4 @@
-# Mayor's Hotline Explorer
+# NIBRS Explorer
 
 Boston's [Mayor's 24-hour Constituent Service](http://www.cityofboston.gov/mayor/24/) allows Boston's citizens a way to engage with the City government to report and track issues that concern them.
 
