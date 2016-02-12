@@ -2,6 +2,8 @@
 
 This application is a rapid prototype designed to show some ideas around data visualization and interactivity for the FBI's UCR RFI. We've used the sample NIBRS data to show interesting graphs of incidents that can be filtered by type, time, and other attributes.
 
+Note that this application was forked from a previous prototype we did for Boston's HubHacks hackathon, the [Mayor's Hotline Explorer](https://github.com/atsid/mayors-hotline-explorer). That prototype originally took a couple days of developer time to create, and this added a couple more for data adaptation and updates.
+
 ## Data assets used
 * NIBRS 2014 [UCR](https://www.fbi.gov/about-us/cjis/ucr/ucr-program-data-collections) sample dataset, provided by the FBI in conjunction with the RFI release ([solicitation number 11420164073](https://www.fbo.gov/index?s=opportunity&mode=form&id=1339c757db4348143c01d9d47518b6e0&tab=core&_cview=1)).
 
@@ -12,10 +14,12 @@ In order to help the prototype load quickly in the absence of any backend servic
  * Formatted as CSV for optimal compactness, versus XML or JSON
 
 ## Technologies used
-* [Bootstrap](http://getbootstrap.com)
-* [dc.js](http://dc-js.github.io/dc.js/)
-* [crossfilter](http://square.github.io/crossfilter/)
-* [lodash.js](https://lodash.com/)
+* [Bootstrap](http://getbootstrap.com) for layout
+* [dc.js](http://dc-js.github.io/dc.js/) for interactive graphs
+* [d3.js](https://d3js.org/) for graphs engine (used by DC)
+* [crossfilter](http://square.github.io/crossfilter/) for multi-dimentional indexing (used by DC)
+* [lodash.js](https://lodash.com/) for utilities
+* [Tableau Desktop](http://www.tableau.com/products/desktop) for initial data exploration
 
 ### Development tools used
 * [GitHub Pages](https://pages.github.com/)
