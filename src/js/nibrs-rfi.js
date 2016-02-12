@@ -41,16 +41,6 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         { chart: offenseChart, id: "#offense-chart" }
     ];
 
-    //map the chart objects onto the window so the HTML reset links work
-    //TODO: map this right with an event selector
-    window.dateChart = dateChart;
-    window.hourChart = hourChart;
-    window.dayChart = dayChart;
-    window.sexByAgeChart = sexByAgeChart;
-    window.raceByAgeChart = raceByAgeChart;
-    window.locationChart = locationChart;
-    window.offenseChart = offenseChart;
-
     function onFiltered(chart, filter) {
         //updateMap(locations.top(Infinity));
     }
@@ -377,7 +367,18 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             utils.handleRejection(reason, "Failed to load D3 with data:");
             utils.clearMarksAndMeasures();
         });
-
+    
+    $('a.reset').on('click', function() {
+        var chartID = '#' + $(this).closest('.chart').attr('id');
+        _.each(allCharts, function(chart) {
+            if (chart.id === chartID) {
+                chart.chart.filterAll();
+                dc.redrawAll();
+                return false;
+            }
+        });
+    });
+    
     window.onresize = function (event) {
         allCharts.forEach(function (chart) {
             // Disable redraw animation first to prevent jitter while resizing window
