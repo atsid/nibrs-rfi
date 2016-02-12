@@ -18,16 +18,18 @@
   "homepage": "https://github.com/atsid/nibrs-rfi",
   "devDependencies": {
     "browser-sync": "^2.2.1",
-    "gulp": "~3.8.11",
-    "gulp-gh-pages": "~0.5.0",
-    "wiredep": "~2.2.2",
-    "gulp-bower": "0.0.10",
-    "gulp-watch": "~4.2.0",
-    "gulp-copy": "0.0.2",
     "del": "~1.1.1",
+    "gulp": "~3.8.11",
+    "gulp-bower": "0.0.10",
+    "gulp-copy": "0.0.2",
     "gulp-ga": "0.0.3",
-    "gulp-util": "~3.0.4",
+    "gulp-gh-pages": "~0.5.0",
+    "gulp-gzip": "^1.2.0",
     "gulp-if-else": "~1.0.3",
-    "gulp-replace": "~0.5.3"
+    "gulp-replace": "~0.5.3",
+    "gulp-useref": "^3.0.5",
+    "gulp-util": "~3.0.4",
+    "gulp-watch": "~4.2.0",
+    "wiredep": "~2.2.2"
   }
 }

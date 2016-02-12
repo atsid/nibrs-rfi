@@ -93,7 +93,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         .spread(function (locations, offenses, nibrsData) {
             performance.mark('Data loaded.');
 
-            var graphLineColor = "#1a8bba",
+            var graphLineColor = "#F5DE93",
                 dayName = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
                 index = crossfilter(nibrsData);
 
@@ -331,7 +331,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .width($('#location-chart').innerWidth() - 30)
                 .height(935)
                 .margins({ top: 10, left: 5, right: 10, bottom: 20 })
-                .colors([graphLineColor])
+                .colors([graphLineColor, ])
                 .group(location.group())
                 .dimension(location)
                 .elasticX(true)
