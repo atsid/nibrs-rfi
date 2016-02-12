@@ -329,7 +329,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
             locationChart
                 .width($('#location-chart').innerWidth() - 30)
-                .height(700)
+                .height(935)
                 .margins({ top: 10, left: 5, right: 10, bottom: 20 })
                 .colors([graphLineColor])
                 .group(location.group())
@@ -344,7 +344,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
             offenseChart
                 .width($('#offense-chart').innerWidth() - 30)
-                .height(700)
+                .height(935)
                 .margins({ top: 10, left: 5, right: 10, bottom: 20 })
                 .colors([graphLineColor])
                 .group(offense.group())
