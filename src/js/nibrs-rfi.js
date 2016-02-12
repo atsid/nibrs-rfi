@@ -52,7 +52,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         var ageRegex = /(\d+)-+/;
         
         return new Promise(function (resolve, reject) {
-            d3.csv('/data/mu_nibrs2-slim.csv',
+            d3.csv('data/mu_nibrs2-slim.csv',
                 function(incident) {
                     var incidentDateStr = incident.INCIDENT_DATE && incident.INCIDENT_DATE.length ?
                                           utils.replaceAll(incident.INCIDENT_DATE, '-', ' ') : '';
@@ -101,8 +101,8 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         });
     }
 
-    Promise.all([$.getJSON('/data/locations.json'),
-                 $.getJSON('/data/offenses.json'),
+    Promise.all([$.getJSON('data/locations.json'),
+                 $.getJSON('data/offenses.json'),
                  getNIBRSData()])
         .spread(function (locations, offenses, nibrsData) {
             performance.mark('Data loaded.');
