@@ -144,7 +144,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             dateChart
                 .width($('#date-chart').innerWidth() - 30)
                 .height(200)
-                .margins({ top: 10, left: 30, right: 10, bottom: 20 })
+                .margins({ top: 10, left: 50, right: 10, bottom: 20 })
                 .x(d3.time.scale().domain([thirtyDaysFrom.thirtyDaysAgo, endDate]))
                 .colors([graphLineColor])
                 .dimension(incidentDateTime)
