@@ -216,7 +216,10 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
     var utils = NIBRS.module.utils;
 
-    var endDate = new Date('7/1/2014'),
+    var search = window.location.search,
+        dataName = (search && search.indexOf('full') > 0) ? 'slim' : 'jun', //little hack to let us test out the full size dataset
+        dataUrl = 'data/mu_nibrs2-' + dataName + '.csv',
+        endDate = new Date('7/1/2014'),
         thirtyDaysFrom = utils.getDate30DaysFrom(endDate),
         minDateLength = '1 Jan 14'.length,
         dateChart = dc.lineChart("#date-chart"),
@@ -247,7 +250,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
         var ageRegex = /(\d+)-+/;
 
         return new Promise(function (resolve, reject) {
-            d3.csv('data/mu_nibrs2-slim.csv',
+            d3.csv(dataUrl,
                 function (incident) {
                     var incidentDateStr = incident.INCIDENT_DATE && incident.INCIDENT_DATE.length ?
                                           utils.replaceAll(incident.INCIDENT_DATE, '-', ' ') : '';
