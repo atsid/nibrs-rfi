@@ -1,13 +1,15 @@
 # NIBRS Explorer
 
-Boston's [Mayor's 24-hour Constituent Service](http://www.cityofboston.gov/mayor/24/) allows Boston's citizens a way to engage with the City government to report and track issues that concern them.
-
-The City of Boston and its [Department of Innovation and Technology](http://www.cityofboston.gov/DoIT/) are sponsoring a [http://hubhacks2.challengepost.com/](public hackathon) to develop data visualizations from the City's [open data portal](https://data.cityofboston.gov/).
-
-This site, the Mayor's Hotline Explorer provides an interactive visualization of the public records concerning reported incidents.
+This application is a rapid prototype designed to show some ideas around data visualization and interactivity for the FBI's UCR RFI. We've used the sample NIBRS data to show interesting graphs of incidents that can be filtered by type, time, and other attributes.
 
 ## Data assets used
-* [Mayor's 24 Hour Hotline Service Requests](https://data.cityofboston.gov/resource/awu8-dc52) under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/).
+* NIBRS 2014 [UCR](https://www.fbi.gov/about-us/cjis/ucr/ucr-program-data-collections) sample dataset, provided by the FBI in conjunction with the RFI release ([solicitation number 11420164073](https://www.fbo.gov/index?s=opportunity&mode=form&id=1339c757db4348143c01d9d47518b6e0&tab=core&_cview=1)).
+
+In order to help the prototype load quickly in the absence of any backend services, we processed the sample dataset in the following ways:
+ * Removed some unused data columns
+ * Culled displayed time period to 30 days of data (June 2014), representing approximately 116,000 records instead of the full 600k+
+ * Mapped location names and offense type names to a code to reduce text within the data.
+ * Formatted as CSV for optimal compactness, versus XML or JSON
 
 ## Technologies used
 * [Bootstrap](http://getbootstrap.com)
@@ -31,6 +33,6 @@ It should be sufficient to start from a clean checkout and issue:
 
 Serve the content locally out of the 'dist' directory.
 
-When it comes time to publish to GitHub Pages, set the environment variables `SOCRATA_APP_TOKEN` and `GA_TRACKING_ID` to inject the correct info for the production instance and issue:
+When it comes time to publish to GitHub Pages, set the environment variable `GA_TRACKING_ID` to inject the correct info for the production instance and issue:
 
     gulp --env production deploy

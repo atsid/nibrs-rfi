@@ -1,4 +1,5 @@
 node_modules/
 dist/
+.idea
 .publish/
 bower_components/
