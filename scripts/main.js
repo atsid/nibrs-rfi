@@ -266,7 +266,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
 
                             incidentDate.setHours(incidentHour);
 
-                            var interestingIncident = {
+                            return {
                                 hour        : incidentHour,
                                 dateHour    : d3.time.hour(incidentDate),
                                 offense     : utils.scrubString(incident.OFFENSE),
@@ -276,7 +276,6 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                                 offenderSex : utils.scrubString(incident.OFFENDER_SEX, 'U'),
                                 offenderRace: utils.scrubString(incident.OFFENDER_RACE, 'U'),
                             };
-                            return interestingIncident;
                         }
                     }
                 },
@@ -432,10 +431,11 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                     return d.value.male;
                 })
                 .x(d3.scale.linear().domain([5, 80]))
+                .xUnits(dc.units.integers)
                 .renderHorizontalGridLines(true)
                 .centerBar(true)
                 .elasticY(true)
-                .brushOn(false)
+                .brushOn(true)
                 .legend(dc.legend().x(sexInnerWidth - 100).y(10))
                 .title(function(d) {
                     var sexAndCount;
@@ -539,7 +539,7 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .renderHorizontalGridLines(true)
                 .centerBar(true)
                 .elasticY(true)
-                .brushOn(false)
+                .brushOn(true)
                 .legend(dc.legend().x(raceInnerWidth - 100).y(10))
                 .title(function(d) {
                     var raceAndCount;
