@@ -436,7 +436,18 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .centerBar(true)
                 .elasticY(true)
                 .brushOn(false)
-                .legend(dc.legend().x(sexInnerWidth - 100).y(10));
+                .legend(dc.legend().x(sexInnerWidth - 100).y(10))
+                .title(function(d) {
+                    var sexAndCount;
+                    _.each(d.data.value, function(count, sex) {
+                        if (count === d.y) {
+                            sex = sex.charAt(0).toUpperCase() + sex.slice(1);
+                            sexAndCount = sex + ': ' + count;
+                            return false;
+                        }
+                    });
+                    return 'Age: ' + d.data.key + '; ' + sexAndCount;
+                });
 
             var raceByAge = offenderAge.group().reduce(
                 function (p, v) {
@@ -529,13 +540,24 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
                 .centerBar(true)
                 .elasticY(true)
                 .brushOn(false)
-                .legend(dc.legend().x(raceInnerWidth - 100).y(10));
+                .legend(dc.legend().x(raceInnerWidth - 100).y(10))
+                .title(function(d) {
+                    var raceAndCount;
+                    _.each(d.data.value, function(count, race) {
+                        if (count === d.y) {
+                            race = race.charAt(0).toUpperCase() + race.slice(1);
+                            raceAndCount = race + ': ' + count;
+                            return false;
+                        }
+                    });
+                    return 'Age: ' + d.data.key + '; ' + raceAndCount;
+                });
 
             locationChart
                 .width($('#location-chart').innerWidth() - 30)
                 .height(935)
                 .margins({ top: 10, left: 5, right: 10, bottom: 20 })
-                .colors([graphLineColor, ])
+                .colors([graphLineColor])
                 .group(location.group())
                 .dimension(location)
                 .elasticX(true)
