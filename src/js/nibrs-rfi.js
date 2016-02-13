@@ -391,10 +391,6 @@ NIBRS.namespace('nibrsGraph', function (nibrsGraph, $) {
             utils.clearMarksAndMeasures();
         });
 
-    _.each($resets, function(reset) {
-        $(reset).css('display', 'none');
-    });
-    
     $resets.on('click', function() {
         var chartID = '#' + $(this).closest('.chart').attr('id');
         _.each(allCharts, function(chart) {
