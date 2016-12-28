@@ -1,3 +1,6 @@
+[![Dependency Status](https://david-dm.org/atsid/nibrs-rfi.svg)](https://david-dm.org/atsid/nibrs-rfi)
+[![devDependency Status](https://david-dm.org/atsid/nibrs-rfi/dev-status.svg)](https://david-dm.org/atsid/nibrs-rfi#info=devDependencies)
+
 # NIBRS Explorer
 
 This application is a rapid prototype designed to show some ideas around data visualization and interactivity for the FBI's UCR RFI. We've used the sample NIBRS data to show interesting graphs of incidents that can be filtered by type, time, and other attributes.
